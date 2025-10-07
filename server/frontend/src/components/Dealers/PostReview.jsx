@@ -59,6 +59,9 @@ const PostReview = () => {
   const json = await res.json();
   if (json.status === 200) {
       window.location.href = window.location.origin+"/dealer/"+id;
+  } else {
+    // *** PUNTO DI DEBUG CRITICO ***
+    alert(`Review failed: ${json.message || 'Unknown error'}. Status: ${json.status}`);
   }
 
   }

@@ -126,8 +126,20 @@ def add_review(request):
         data = json.loads(request.body)
         try:
             response = post_review(data)
-            return JsonResponse({"status":200})
-        except:
-            return JsonResponse({"status":401,"message":"Error in posting review"})
+            
+            # NUOVA LOGICA: Se la risposta non è None e contiene le chiavi tipiche
+            # di una recensione (es. '_id' o 'dealership'), assumiamo successo.
+            if response is not None and ('_id' in response or 'dealership' in response):
+                # SUCCESS
+                return JsonResponse({"status": 200})
+            else:
+                # Il microservizio ha risposto ma con un payload inatteso/non di successo.
+                return JsonResponse({"status": 401, "message": "Microservice returned an invalid response."})
+        
+        except Exception as e:
+            # Cattura errori di rete, timeout, o errori del microservizio
+            print(f"Exception in add_review: {e}")
+            return JsonResponse({"status":401,"message":"Error in posting review (Exception)"})
     else:
+        # Utente non loggato, gestito in precedenza.
         return JsonResponse({"status":403,"message":"Unauthorized"})
